@@ -5,7 +5,7 @@ By: Jos Hendriks
 GitHub: https://github.com/joshendriks/
 Docker: https://hub.docker.com/r/joshendriks/ 
 
-BTC: 1NCZgpMMoNwL6ZeFsEQ2kRZEzzzTd5TuGk
+BTC: 1NCZgpMMoNwL6ZeFsEQ2kRZEzzzTd5TuGk"
 
 config="/config/legends.conf"
 if [ -f "$config" ]
