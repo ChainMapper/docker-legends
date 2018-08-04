@@ -1,10 +1,5 @@
-FROM ubuntu:xenial
+FROM chainmapper/walletbase-xenial-build as builder
 
-RUN apt-get update \
-    && apt-get -y upgrade \
-	&& apt-get -y install build-essential libssl-dev libdb-dev libdb++-dev libboost-all-dev git libssl1.0.0-dbg \
-	&& apt-get -y install libdb-dev libdb++-dev libboost-all-dev libminiupnpc-dev libminiupnpc-dev libevent-dev libcrypto++-dev libgmp3-dev
-	
 ENV GIT_COIN_URL    https://github.com/legev/legends.git
 ENV GIT_COIN_NAME   legends   
 
@@ -15,19 +10,20 @@ RUN	git clone $GIT_COIN_URL $GIT_COIN_NAME \
 	&& cd src \
 	&& mkdir obj/support \
 	&& mkdir obj/crypto \
-	&& make -f	makefile.unix RELEASE=1\
-	&& cp legendsd /usr/local/bin \
-	&& cd / && rm -rf /$GIT_COIN_NAME \
-	&& mkdir /data \
-	&& mkdir /data/.legends
+	&& make -f	makefile.unix "USE_UPNP=-"\
+	&& cp legendsd /usr/local/bin
+	
+FROM chainmapper/walletbase-xenial as runtime
 
-COPY legends.conf /data/.legends/legends.conf
+COPY --from=builder /usr/local/bin /usr/local/bin
 
-#rpc and p2p port
-EXPOSE 8332 8333
-
+RUN mkdir /data
 ENV HOME /data
 
+#rpc port & main port
+EXPOSE 8332 8333
+
 COPY start.sh /start.sh
-RUN chmod 777 /start.sh
-CMD /start.sh
+COPY gen_config.sh /gen_config.sh
+RUN chmod 777 /*.sh
+CMD /start.sh legends.conf LEGENDS legendsd
